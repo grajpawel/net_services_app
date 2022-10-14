@@ -3,12 +3,14 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+ENV ASPNETCORE\_URLS http://\*:5000
+
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["net_services_app/Dashboard/Dashboard.csproj", "Dashboard/"]
+COPY ["Dashboard.csproj", "Dashboard/"]
 RUN dotnet restore "Dashboard/Dashboard.csproj"
-COPY . .
 WORKDIR "/src/Dashboard"
+COPY . .
 RUN dotnet build "Dashboard.csproj" -c Release -o /app/build
 
 FROM build AS publish

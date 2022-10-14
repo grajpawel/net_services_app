@@ -3,10 +3,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["net_services_app/SampleMessageGenerator/SampleMessageGenerator.csproj", "SampleMessageGenerator/"]
+COPY ["SampleMessageGenerator.csproj", "SampleMessageGenerator/"]
 RUN dotnet restore "SampleMessageGenerator/SampleMessageGenerator.csproj"
-COPY . .
 WORKDIR "/src/SampleMessageGenerator"
+COPY . .
 RUN dotnet build "SampleMessageGenerator.csproj" -c Release -o /app/build
 
 FROM build AS publish

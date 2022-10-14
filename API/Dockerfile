@@ -3,10 +3,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["net_services_app/API/API.csproj", "API/"]
-RUN dotnet restore "API/API.csproj"
-COPY . .
+COPY ["API.csproj", "API/"]
+RUN dotnet restore "API/API.csproj" -r linux-arm64
 WORKDIR "/src/API"
+COPY . .
 RUN dotnet build "API.csproj" -c Release -o /app/build
 
 FROM build AS publish

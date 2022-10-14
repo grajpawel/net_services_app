@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  net.services.api:
+    container_name: net.services.api
+    image: net.services.api:latest
+    build:
+      context: ../API
+      dockerfile: Dockerfile
+
+  net.services.dashboard:
+    container_name: net.services.dashboard
+    image: net.services.dashboard:latest
+    ports:
+      - 5000:5000
+      - 5001:5001
+    build:
+      context: ../Dashboard
+      dockerfile: Dockerfile
+
+  net.services.messagegenerator:
+    container_name: net.services.messagegenerator
+    image: net.services.messagegenerator:latest
+    build:
+      context: ../SampleMessageGenerator
+      dockerfile: Dockerfile
+
+  net.services.rabbitmq:
+    container_name: net.services.rabbitmq
+    image: rabbitmq:latest
