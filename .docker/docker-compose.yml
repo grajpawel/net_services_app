@@ -46,7 +46,7 @@ services:
         - h4=50
         - l4=3
         - sleep4=150
-      profile: ["gen"]
+      profiles: ["gen"]
 
   net.services.rabbitmq:
     container_name: net.services.rabbitmq
