@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.3'
 
 services:
   net.services.api:
@@ -7,6 +7,7 @@ services:
     build:
       context: ../API
       dockerfile: Dockerfile
+    profiles: ["app"]
 
   net.services.dashboard:
     container_name: net.services.dashboard
@@ -17,6 +18,7 @@ services:
     build:
       context: ../Dashboard
       dockerfile: Dockerfile
+    profiles: ["app"]
 
   net.services.messagegenerator:
     container_name: net.services.messagegenerator
@@ -24,7 +26,29 @@ services:
     build:
       context: ../SampleMessageGenerator
       dockerfile: Dockerfile
+      environment:
+        - mode=one
+        - type=1
+        - value=500
+        - n1=10
+        - h1=50
+        - l1=3
+        - sleep1=150
+        - n2=10
+        - h2=50
+        - l2=3
+        - sleep2=150
+        - n3=10
+        - h3=50
+        - l3=3
+        - sleep3=150
+        - n4=10
+        - h4=50
+        - l4=3
+        - sleep4=150
+      profile: ["gen"]
 
   net.services.rabbitmq:
     container_name: net.services.rabbitmq
     image: rabbitmq:latest
+    profiles: ["app"]
