@@ -22,9 +22,19 @@ services:
     container_name: net.services.messagegenerator
     image: net.services.messagegenerator:latest
     build:
-      context: ../SampleMessageGenerator
+      context: ../MessageGenerator
       dockerfile: Dockerfile
+    networks:
+      - rabbitmq_go_net
 
   net.services.rabbitmq:
     container_name: net.services.rabbitmq
-    image: rabbitmq:latest
+    image: rabbitmq:management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - rabbitmq_go_net
+
+networks:
+  rabbitmq_go_net:
