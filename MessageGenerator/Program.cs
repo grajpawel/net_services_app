@@ -1,6 +1,7 @@
 ﻿using System;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 
@@ -21,9 +22,9 @@ namespace MessageGenerator
                 {
                     services.AddMassTransit(x =>
                     {
-                        x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(config =>
+                        x.AddBus(_ => Bus.Factory.CreateUsingRabbitMq(config =>
                         {
-                            config.Host(new Uri("amqp://guest:guest@net.services.rabbitmq"), h =>
+                            config.Host(new Uri($"{RabbitMqConsts.RabbitMqUri}"), h =>
                             {
                                 h.Username("guest");
                                 h.Password("guest");
@@ -32,20 +33,20 @@ namespace MessageGenerator
                     });
                     services.AddQuartz(q =>
                     {
+                        q.UseMicrosoftDependencyInjectionJobFactory();
+
                         IConfiguration configuration = hostContext.Configuration;
 
-                        q.UseMicrosoftDependencyInjectionScopedJobFactory();
-
                         // Create a "key" for the job
-                        var jobKey = new JobKey("HelloWorldJob");
+                        var jobKey = new JobKey("SendMessageJob");
 
                         // Register the job with the DI container
-                        q.AddJob<HelloWorldJob>(opts => opts.WithIdentity(jobKey));
+                        q.AddJob<SendMessageJob>(opts => opts.WithIdentity(jobKey));
 
                         // Create a trigger for the job
                         q.AddTrigger(opts => opts
                             .ForJob(jobKey) // link to the HelloWorldJob
-                            .WithIdentity("HelloWorldJob-trigger") // give the trigger a unique name
+                            .WithIdentity("SendMessageJob-trigger") // give the trigger a unique name
                             .WithCronSchedule("0/5 * * * * ?")); // run every 5 seconds
 
                     });
