@@ -1,5 +1,6 @@
 ﻿using System;
 using MassTransit;
+using MessageGenerator.Jobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,18 +17,20 @@ namespace MessageGenerator
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-
             return Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    IConfiguration configuration = hostContext.Configuration;
+                    var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>();
+
                     services.AddMassTransit(x =>
                     {
                         x.AddBus(_ => Bus.Factory.CreateUsingRabbitMq(config =>
                         {
-                            config.Host(new Uri($"{RabbitMqConsts.RabbitMqUri}"), h =>
+                            config.Host(new Uri($"{appOptions.RabbitMqUri}"), h =>
                             {
-                                h.Username("guest");
-                                h.Password("guest");
+                                h.Username(appOptions.Username);
+                                h.Password(appOptions.Password);
                             });
                         }));
                     });
@@ -35,20 +38,41 @@ namespace MessageGenerator
                     {
                         q.UseMicrosoftDependencyInjectionJobFactory();
 
-                        IConfiguration configuration = hostContext.Configuration;
-
-                        // Create a "key" for the job
-                        var jobKey = new JobKey("SendMessageJob");
+                        // Create a "key" for jobs
+                        var humidityJobKey = new JobKey("HumidityJob");
+                        var pressureJobKey = new JobKey("PressureJob");
+                        var temperatureJobKey = new JobKey("TemperatureJob");
+                        var windJobKey = new JobKey("WindJob");
 
                         // Register the job with the DI container
-                        q.AddJob<SendMessageJob>(opts => opts.WithIdentity(jobKey));
+                        q.AddJob<HumidityJob>(opts => opts.WithIdentity(humidityJobKey));
+                        q.AddJob<PressureJob>(opts => opts.WithIdentity(pressureJobKey));
+                        q.AddJob<TemperatureJob>(opts => opts.WithIdentity(temperatureJobKey));
+                        q.AddJob<WindJob>(opts => opts.WithIdentity(windJobKey));
 
                         // Create a trigger for the job
                         q.AddTrigger(opts => opts
-                            .ForJob(jobKey) // link to the HelloWorldJob
-                            .WithIdentity("SendMessageJob-trigger") // give the trigger a unique name
-                            .WithCronSchedule("0/5 * * * * ?")); // run every 5 seconds
+                            .ForJob(humidityJobKey)
+                            .WithIdentity("humidityJobKey-trigger")
+                            .WithCronSchedule(appOptions.HumidityJobCron));
 
+                        // Create a trigger for the job
+                        q.AddTrigger(opts => opts
+                            .ForJob(pressureJobKey)
+                            .WithIdentity("pressureJobKey-trigger")
+                            .WithCronSchedule(appOptions.PressureJobCron));
+
+                        // Create a trigger for the job
+                        q.AddTrigger(opts => opts
+                            .ForJob(temperatureJobKey)
+                            .WithIdentity("temperatureJobKey-trigger")
+                            .WithCronSchedule(appOptions.TemperatureJobCron));
+
+                        // Create a trigger for the job
+                        q.AddTrigger(opts => opts
+                            .ForJob(windJobKey)
+                            .WithIdentity("windJobKey-trigger")
+                            .WithCronSchedule(appOptions.WindJobCron));
                     });
                     services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
                 });
