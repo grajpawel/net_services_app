@@ -9,6 +9,8 @@ services:
       dockerfile: Dockerfile
     networks:
       - rabbitmq_go_net
+    environment:
+      - AppOptions__RabbitMqUri=amqp://guest:guest@net.services.rabbitmq
 
   net.services.dashboard:
     container_name: net.services.dashboard
@@ -28,6 +30,8 @@ services:
       dockerfile: Dockerfile
     networks:
       - rabbitmq_go_net
+    environment:
+      - AppOptions__RabbitMqUri=amqp://guest:guest@net.services.rabbitmq
 
   net.services.rabbitmq:
     container_name: net.services.rabbitmq

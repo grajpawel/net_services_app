@@ -1,23 +1,24 @@
 ﻿using System;
 
+// MassTransit uses namespaces as well - we need to keep the Publisher/Receiver bodies' namespaces the same
 namespace MessageGenerator.MessageBodies
 {
     public class Temperature
     {
-        private int Id { get; }
-        private DateTime Time { get; }
-        private decimal Value { get; }
+        public int SensorId { get; }
+        public DateTime Time { get; }
+        public decimal Value { get; }
 
-        public Temperature(int id, decimal value)
+        public Temperature(int sensorId, decimal value)
         {
-            Id = id;
+            SensorId = sensorId;
             Time = DateTime.UtcNow;
             Value = value;
         }
 
         public override string ToString()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
+            return $"{nameof(SensorId)}: {SensorId}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
         }
     }
 }
