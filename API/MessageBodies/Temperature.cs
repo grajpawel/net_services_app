@@ -2,13 +2,13 @@
 
 namespace MessageGenerator.MessageBodies
 {
-    public class Humidity
+    public class Temperature
     {
-        public int Id { get; }
+        private int Id { get; }
         private DateTime Time { get; }
         private decimal Value { get; }
 
-        public Humidity(int id, decimal value)
+        public Temperature(int id, decimal value)
         {
             Id = id;
             Time = DateTime.UtcNow;
