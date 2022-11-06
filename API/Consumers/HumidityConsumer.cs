@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MassTransit;
 using MessageGenerator.MessageBodies;
 
-namespace API
+namespace API.Consumers
 {
     public class HumidityConsumer : IConsumer<Humidity>
 
@@ -11,7 +11,7 @@ namespace API
         public async Task Consume(ConsumeContext<Humidity> context)
         {
             await Console.Out.WriteLineAsync(
-                $"Humidity data Received: {context.Message}");
+                $"Humidity data received: {context.Message}");
         }
     }
 }

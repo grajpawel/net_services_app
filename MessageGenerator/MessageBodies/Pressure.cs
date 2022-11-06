@@ -4,19 +4,19 @@ namespace MessageGenerator.MessageBodies
 {
     public class Pressure
     {
-        private int Id { get; }
-        private DateTime Time { get; }
+        public int SensorId { get; }
+        public DateTime Time { get; }
 
         public override string ToString()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
+            return $"{nameof(SensorId)}: {SensorId}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
         }
 
-        private decimal Value { get; }
+        public decimal Value { get; }
 
-        public Pressure(int id, decimal value)
+        public Pressure(int sensorId, decimal value)
         {
-            Id = id;
+            SensorId = sensorId;
             Time = DateTime.UtcNow;
             Value = value;
         }

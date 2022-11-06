@@ -4,20 +4,20 @@ namespace MessageGenerator.MessageBodies
 {
     public class Humidity
     {
-        public int Id { get; }
-        private DateTime Time { get; }
-        private decimal Value { get; }
+        public int SensorId { get; set; }
+        public DateTime Time { get; set; }
+        public decimal Value { get; set; }
 
-        public Humidity(int id, decimal value)
+        public Humidity(int sensorId, decimal value)
         {
-            Id = id;
+            SensorId = sensorId;
             Time = DateTime.UtcNow;
             Value = value;
         }
 
         public override string ToString()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
+            return $"{nameof(SensorId)}: {SensorId}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
         }
     }
 }

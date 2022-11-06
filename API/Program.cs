@@ -1,4 +1,5 @@
 ﻿using System;
+using API.Consumers;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -32,6 +33,12 @@ namespace API
 
                             config.ReceiveEndpoint("humidity_data",
                                 e => { e.Consumer<HumidityConsumer>(); });
+                            config.ReceiveEndpoint("pressure_data",
+                                e => { e.Consumer<PressureConsumer>(); });
+                            config.ReceiveEndpoint("temperature_data",
+                                e => { e.Consumer<TemperatureConsumer>(); });
+                            config.ReceiveEndpoint("wind_data",
+                                e => { e.Consumer<WindConsumer>(); });
                         }));
                     });
                 });

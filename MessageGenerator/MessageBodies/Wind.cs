@@ -4,14 +4,14 @@ namespace MessageGenerator.MessageBodies
 {
     public class Wind
     {
-        private int Id { get; }
-        private DateTime Time { get; }
-        private decimal Speed { get; }
-        private string Direction { get; }
+        public int SensorId { get; }
+        public DateTime Time { get; }
+        public decimal Speed { get; }
+        public string Direction { get; }
 
-        public Wind(int id, decimal speed, string direction)
+        public Wind(int sensorId, decimal speed, string direction)
         {
-            Id = id;
+            SensorId = sensorId;
             Time = DateTime.UtcNow;
             Speed = speed;
             Direction = direction;
@@ -19,7 +19,7 @@ namespace MessageGenerator.MessageBodies
 
         public override string ToString()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Time)}: {Time}, {nameof(Speed)}: {Speed}, {nameof(Direction)}: {Direction}";
+            return $"{nameof(SensorId)}: {SensorId}, {nameof(Time)}: {Time}, {nameof(Speed)}: {Speed}, {nameof(Direction)}: {Direction}";
         }
     }
 }
