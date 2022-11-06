@@ -2,13 +2,12 @@
 using MassTransit;
 using MessageGenerator.Jobs;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 
 namespace MessageGenerator
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
