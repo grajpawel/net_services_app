@@ -14,7 +14,7 @@ namespace MessageGenerator.Jobs
         public HumidityJob(ILogger<HumidityJob> logger, IBusControl busControl)
         {
             _logger = logger;
-            this._busControl = busControl;
+            _busControl = busControl;
         }
 
         public async Task Execute(IJobExecutionContext context)
