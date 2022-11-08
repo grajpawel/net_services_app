@@ -3,11 +3,11 @@
 // MassTransit uses namespaces as well - we need to keep the Publisher/Receiver bodies' namespaces the same
 namespace MessageGenerator.MessageBodies
 {
-    public class Temperature
+    public partial class Temperature
     {
-        public int SensorId { get; }
-        public DateTime Time { get; }
-        public decimal Value { get; }
+        public int SensorId { get; set; }
+        public DateTime Time { get; set; }
+        public decimal Value { get; set; }
 
         public Temperature(int sensorId, decimal value)
         {

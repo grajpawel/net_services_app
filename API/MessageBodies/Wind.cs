@@ -5,10 +5,10 @@ namespace MessageGenerator.MessageBodies
 {
     public class Wind
     {
-        public int SensorId { get; }
-        public DateTime Time { get; }
-        public decimal Speed { get; }
-        public string Direction { get; }
+        public int SensorId { get; set; }
+        public DateTime Time { get; set; }
+        public decimal Speed { get; set; }
+        public string Direction { get; set; }
 
         public Wind(int sensorId, decimal speed, string direction)
         {

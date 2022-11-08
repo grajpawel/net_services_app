@@ -37,37 +37,31 @@ namespace MessageGenerator
                     {
                         q.UseMicrosoftDependencyInjectionJobFactory();
 
-                        // Create a "key" for jobs
                         var humidityJobKey = new JobKey("HumidityJob");
                         var pressureJobKey = new JobKey("PressureJob");
                         var temperatureJobKey = new JobKey("TemperatureJob");
                         var windJobKey = new JobKey("WindJob");
 
-                        // Register the job with the DI container
                         q.AddJob<HumidityJob>(opts => opts.WithIdentity(humidityJobKey));
                         q.AddJob<PressureJob>(opts => opts.WithIdentity(pressureJobKey));
                         q.AddJob<TemperatureJob>(opts => opts.WithIdentity(temperatureJobKey));
                         q.AddJob<WindJob>(opts => opts.WithIdentity(windJobKey));
 
-                        // Create a trigger for the job
                         q.AddTrigger(opts => opts
                             .ForJob(humidityJobKey)
                             .WithIdentity("humidityJobKey-trigger")
                             .WithCronSchedule(appOptions.HumidityJobCron));
 
-                        // Create a trigger for the job
                         q.AddTrigger(opts => opts
                             .ForJob(pressureJobKey)
                             .WithIdentity("pressureJobKey-trigger")
                             .WithCronSchedule(appOptions.PressureJobCron));
 
-                        // Create a trigger for the job
                         q.AddTrigger(opts => opts
                             .ForJob(temperatureJobKey)
                             .WithIdentity("temperatureJobKey-trigger")
                             .WithCronSchedule(appOptions.TemperatureJobCron));
 
-                        // Create a trigger for the job
                         q.AddTrigger(opts => opts
                             .ForJob(windJobKey)
                             .WithIdentity("windJobKey-trigger")

@@ -5,21 +5,21 @@ namespace MessageGenerator.MessageBodies
 {
     public class Pressure
     {
-        public int SensorId { get; }
-        public DateTime Time { get; }
+        public int SensorId { get; set; }
+        public DateTime Time { get; set; }
 
-        public override string ToString()
-        {
-            return $"{nameof(SensorId)}: {SensorId}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
-        }
-
-        public decimal Value { get; }
+        public decimal Value { get; set; }
 
         public Pressure(int sensorId, decimal value)
         {
             SensorId = sensorId;
             Time = DateTime.UtcNow;
             Value = value;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(SensorId)}: {SensorId}, {nameof(Time)}: {Time}, {nameof(Value)}: {Value}";
         }
     }
 }
