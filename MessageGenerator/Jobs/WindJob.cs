@@ -19,9 +19,12 @@ namespace MessageGenerator.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
+            var dataMap = context.JobDetail.JobDataMap;
+            var sensorId = dataMap.GetIntValue("sensorId");
+
             var sendToUri = new Uri("queue:wind_data");
             var endPoint = await _busControl.GetSendEndpoint(sendToUri);
-            var body = new Wind(1, 10, "NorthWest");
+            var body = new Wind(sensorId, 10, "NorthWest");
             _logger.LogInformation("Sending a message: " + body);
             await endPoint.Send(body);
         }

@@ -42,30 +42,45 @@ namespace MessageGenerator
                         var temperatureJobKey = new JobKey("TemperatureJob");
                         var windJobKey = new JobKey("WindJob");
 
-                        q.AddJob<HumidityJob>(opts => opts.WithIdentity(humidityJobKey));
-                        q.AddJob<PressureJob>(opts => opts.WithIdentity(pressureJobKey));
-                        q.AddJob<TemperatureJob>(opts => opts.WithIdentity(temperatureJobKey));
-                        q.AddJob<WindJob>(opts => opts.WithIdentity(windJobKey));
+                        for (var i = 0; i < 10; i++)
+                        {
+                            var counter = i;
+                            q.AddJob<HumidityJob>(opts => opts
+                                .WithIdentity(humidityJobKey+counter.ToString())
+                                .UsingJobData("sensorId", counter));
 
-                        q.AddTrigger(opts => opts
-                            .ForJob(humidityJobKey)
-                            .WithIdentity("humidityJobKey-trigger")
-                            .WithCronSchedule(appOptions.HumidityJobCron));
+                            q.AddJob<PressureJob>(opts => opts
+                                .WithIdentity(pressureJobKey+counter.ToString())
+                                .UsingJobData("sensorId", counter));
 
-                        q.AddTrigger(opts => opts
-                            .ForJob(pressureJobKey)
-                            .WithIdentity("pressureJobKey-trigger")
-                            .WithCronSchedule(appOptions.PressureJobCron));
+                            q.AddJob<TemperatureJob>(opts => opts
+                                .WithIdentity(temperatureJobKey+counter.ToString())
+                                .UsingJobData("sensorId", counter));
 
-                        q.AddTrigger(opts => opts
-                            .ForJob(temperatureJobKey)
-                            .WithIdentity("temperatureJobKey-trigger")
-                            .WithCronSchedule(appOptions.TemperatureJobCron));
+                            q.AddJob<WindJob>(opts => opts
+                                .WithIdentity(windJobKey+counter.ToString())
+                                .UsingJobData("sensorId", counter));
 
-                        q.AddTrigger(opts => opts
-                            .ForJob(windJobKey)
-                            .WithIdentity("windJobKey-trigger")
-                            .WithCronSchedule(appOptions.WindJobCron));
+                            q.AddTrigger(opts => opts
+                                .ForJob(humidityJobKey+counter.ToString())
+                                .WithIdentity("humidityJobKey-trigger"+counter.ToString())
+                                .WithCronSchedule(appOptions.HumidityJobCron));
+
+                            q.AddTrigger(opts => opts
+                                .ForJob(pressureJobKey+counter.ToString())
+                                .WithIdentity("pressureJobKey-trigger"+counter.ToString())
+                                .WithCronSchedule(appOptions.PressureJobCron));
+
+                            q.AddTrigger(opts => opts
+                                .ForJob(temperatureJobKey+counter.ToString())
+                                .WithIdentity("temperatureJobKey-trigger"+counter.ToString())
+                                .WithCronSchedule(appOptions.TemperatureJobCron));
+
+                            q.AddTrigger(opts => opts
+                                .ForJob(windJobKey+counter.ToString())
+                                .WithIdentity("windJobKey-trigger"+counter.ToString())
+                                .WithCronSchedule(appOptions.WindJobCron));
+                        }
                     });
                     services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
                 });
