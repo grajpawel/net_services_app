@@ -19,9 +19,12 @@ namespace MessageGenerator.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
+            var dataMap = context.JobDetail.JobDataMap;
+            var sensorId = dataMap.GetIntValue("sensorId");
+
             var sendToUri = new Uri("queue:pressure_data");
             var endPoint = await _busControl.GetSendEndpoint(sendToUri);
-            var body = new Pressure(1, 1000);
+            var body = new Pressure(sensorId, 1000);
             _logger.LogInformation("Sending a message: " + body);
             await endPoint.Send(body);
         }
