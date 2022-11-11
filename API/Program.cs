@@ -1,11 +1,14 @@
 ﻿using System;
 using API.Consumers;
+using API.Dtos;
 using API.MongoDb;
+using AutoMapper;
 using MassTransit;
+using MessageGenerator.MessageBodies;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 
 namespace API
 {
@@ -21,34 +24,66 @@ namespace API
             return Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    IConfiguration configuration = hostContext.Configuration;
+                    var mapperConfiguration = new MapperConfiguration(cfg =>
+                    {
+                        cfg.CreateMap<HumidityDto, Humidity>();
+                        cfg.CreateMap<Humidity, HumidityDto>();
+                        cfg.CreateMap<PressureDto, Pressure>();
+                        cfg.CreateMap<Pressure, PressureDto>();
+                        cfg.CreateMap<TemperatureDto, Temperature>();
+                        cfg.CreateMap<Temperature, TemperatureDto>();
+                        cfg.CreateMap<WindDto, Wind>();
+                        cfg.CreateMap<Wind, WindDto>();
+                    });
+
+                    var mapper = mapperConfiguration.CreateMapper();
+                    services.AddSingleton<IMapper>(mapper);
+
+                    var configuration = hostContext.Configuration;
                     var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>();
 
-                    var mongoDbHumiditySettings = configuration.GetSection("MongoDbHumiditySettings").Get<MongoDbSettings>();
-                    var mongoDbPressureSettings = configuration.GetSection("MongoDbPressureSettings").Get<MongoDbSettings>();
-                    var mongoDbTemperatureSettings = configuration.GetSection("MongoDbTemperatureSettings").Get<MongoDbSettings>();
-                    var mongoDbWindSettings = configuration.GetSection("MongoDbWindSettings").Get<MongoDbSettings>();
+                    var mongoDbHumiditySettings =
+                        configuration.GetSection("MongoDbHumiditySettings").Get<MongoDbHumiditySettings>();
+                    var mongoDbPressureSettings =
+                        configuration.GetSection("MongoDbPressureSettings").Get<MongoDbPressureSettings>();
+                    var mongoDbTemperatureSettings =
+                        configuration.GetSection("MongoDbTemperatureSettings").Get<MongoDbTemperatureSettings>();
+                    var mongoDbWindSettings = configuration.GetSection("MongoDbWindSettings").Get<MongoDbWindSettings>();
+
+                    services.AddSingleton(mongoDbHumiditySettings);
+                    services.AddSingleton(mongoDbPressureSettings);
+                    services.AddSingleton(mongoDbTemperatureSettings);
+                    services.AddSingleton(mongoDbWindSettings);
+
+                    var humidityService =  new HumidityService(mongoDbHumiditySettings, mapper);
+                    var pressureService =  new PressureService(mongoDbPressureSettings, mapper);
+                    var temperatureService =  new TemperatureService(mongoDbTemperatureSettings, mapper);
+                    var windService =  new WindService(mongoDbWindSettings, mapper);
 
                     services.AddMassTransit(x =>
                     {
-                        x.AddBus(_ => Bus.Factory.CreateUsingRabbitMq(config =>
+                        x.AddBus(_ => Bus.Factory.CreateUsingRabbitMq(rabbitConfig =>
                         {
-                            config.Host(new Uri($"{appOptions.RabbitMqUri}"), h =>
+                            rabbitConfig.Host(new Uri($"{appOptions.RabbitMqUri}"), h =>
                             {
                                 h.Username(appOptions.Username);
                                 h.Password(appOptions.Password);
                             });
 
-                            config.ReceiveEndpoint("humidity_data",
-                                e => { e.Consumer(() => new HumidityConsumer(mongoDbHumiditySettings)); });
-                            config.ReceiveEndpoint("pressure_data",
-                                e => { e.Consumer(() => new PressureConsumer(mongoDbPressureSettings)); });
-                            config.ReceiveEndpoint("temperature_data",
-                                e => { e.Consumer(() => new TemperatureConsumer(mongoDbTemperatureSettings)); });
-                            config.ReceiveEndpoint("wind_data",
-                                e => { e.Consumer(() => new WindConsumer(mongoDbWindSettings)); });
+                            rabbitConfig.ReceiveEndpoint("humidity_data",
+                                e => { e.Consumer(() => new HumidityConsumer(humidityService)); });
+                            rabbitConfig.ReceiveEndpoint("pressure_data",
+                                e => { e.Consumer(() => new PressureConsumer(pressureService)); });
+                            rabbitConfig.ReceiveEndpoint("temperature_data",
+                                e => { e.Consumer(() => new TemperatureConsumer(temperatureService)); });
+                            rabbitConfig.ReceiveEndpoint("wind_data",
+                                e => { e.Consumer(() => new WindConsumer(windService)); });
                         }));
                     });
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
                 });
         }
     }

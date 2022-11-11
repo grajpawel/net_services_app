@@ -1,33 +1,51 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Dtos;
+using AutoMapper;
 using MessageGenerator.MessageBodies;
 using MongoDB.Driver;
 
-namespace API.MongoDb{
+namespace API.MongoDb
+{
 
     public class PressureService
     {
-        private readonly IMongoCollection<Pressure> _collection;
+        private readonly IMongoCollection<PressureDto> _collection;
+        private readonly IMapper _mapper;
 
-        public PressureService(MongoDbSettings mongoDbSettings)
+        public PressureService(MongoDbPressureSettings mongoDbSettings, IMapper mapper)
         {
-            MongoClient client = new MongoClient(mongoDbSettings.ConnectionUri);
-            IMongoDatabase database = client.GetDatabase(mongoDbSettings.DatabaseName);
-            _collection = database.GetCollection<Pressure>(mongoDbSettings.CollectionName);
+            _mapper = mapper;
+            var client = new MongoClient(mongoDbSettings.ConnectionUri);
+            var database = client.GetDatabase(mongoDbSettings.DatabaseName);
+            _collection = database.GetCollection<PressureDto>(mongoDbSettings.CollectionName);
         }
 
-        public async Task<List<Pressure>> GetAsync()
+        public async Task<List<PressureDto>> GetAsync()
         {
-            return await _collection.FindAsync(FilterDefinition<Pressure>.Empty).Result.ToListAsync();
+            return await _collection.FindAsync(FilterDefinition<PressureDto>.Empty).Result.ToListAsync();
         }
 
+        public async Task<List<PressureDto>> GetSensorDataAsync(int sensorId)
+        {
+            return await _collection.FindAsync(Builders<PressureDto>.Filter.Eq(pressure => pressure.SensorId, sensorId )).Result.ToListAsync();
+        }
         public async Task InsertOneAsync(Pressure pressure)
         {
-            await _collection.InsertOneAsync(pressure);
+            var dto = _mapper.Map<PressureDto>(pressure);
+
+            var indexOptions = new CreateIndexOptions();
+            var indexKeys = Builders<PressureDto>.IndexKeys.Ascending(field => field.SensorId).Descending(field => field.Time);
+            var indexModel = new CreateIndexModel<PressureDto>(indexKeys, indexOptions);
+            await _collection.Indexes.CreateOneAsync(indexModel);
+
+            await _collection.InsertOneAsync(dto);
         }
 
         public async Task DeleteAsync(string id)
         {
+            throw new NotImplementedException();
         }
     }
 }

@@ -7,20 +7,18 @@ using MessageGenerator.MessageBodies;
 namespace API.Consumers
 {
     public class PressureConsumer : IConsumer<Pressure>
-
     {
-        private MongoDbSettings _dbSettings;
+        private readonly PressureService _service;
 
-        public PressureConsumer(MongoDbSettings dbSettings)
+        public PressureConsumer(PressureService service)
         {
-            _dbSettings = dbSettings;
+            _service = service;
         }
 
         public async Task Consume(ConsumeContext<Pressure> context)
         {
-            var service = new PressureService(_dbSettings);
 
-            await service.InsertOneAsync(context.Message);
+            await _service.InsertOneAsync(context.Message);
 
             await Console.Out.WriteLineAsync(
                 $"Pressure data received: {context.Message}");

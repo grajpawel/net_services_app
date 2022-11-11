@@ -1,15 +1,19 @@
 ﻿using System;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-// MassTransit uses namespaces as well - we need to keep the Publisher/Receiver bodies' namespaces the same
-namespace MessageGenerator.MessageBodies
+namespace API.Dtos
 {
-    public class Temperature
+    public class PressureDto
     {
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string _id { get; set; }
         public int SensorId { get; set; }
         public DateTime Time { get; set; }
+
         public decimal Value { get; set; }
 
-        public Temperature(int sensorId, decimal value)
+        public PressureDto(int sensorId, decimal value)
         {
             SensorId = sensorId;
             Time = DateTime.UtcNow;

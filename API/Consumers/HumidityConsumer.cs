@@ -7,20 +7,18 @@ using MessageGenerator.MessageBodies;
 namespace API.Consumers
 {
     public class HumidityConsumer : IConsumer<Humidity>
-
     {
-        private MongoDbSettings _dbSettings;
+        private readonly HumidityService _service;
 
-        public HumidityConsumer(MongoDbSettings dbSettings)
+        public HumidityConsumer(HumidityService service)
         {
-            _dbSettings = dbSettings;
+            _service = service;
         }
 
         public async Task Consume(ConsumeContext<Humidity> context)
         {
-            var service = new HumidityService(_dbSettings);
 
-            await service.InsertOneAsync(context.Message);
+            await _service.InsertOneAsync(context.Message);
 
             await Console.Out.WriteLineAsync(
                 $"Humidity data received: {context.Message}");
