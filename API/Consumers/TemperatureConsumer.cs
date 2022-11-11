@@ -7,20 +7,18 @@ using MessageGenerator.MessageBodies;
 namespace API.Consumers
 {
     public class TemperatureConsumer : IConsumer<Temperature>
-
     {
-        private MongoDbSettings _dbSettings;
+        private readonly TemperatureService _service;
 
-        public TemperatureConsumer(MongoDbSettings dbSettings)
+        public TemperatureConsumer(TemperatureService service)
         {
-            _dbSettings = dbSettings;
+            _service = service;
         }
 
         public async Task Consume(ConsumeContext<Temperature> context)
         {
-            var service = new TemperatureService(_dbSettings);
 
-            await service.InsertOneAsync(context.Message);
+            await _service.InsertOneAsync(context.Message);
 
             await Console.Out.WriteLineAsync(
                 $"Temperature data received: {context.Message}");

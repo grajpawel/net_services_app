@@ -1,33 +1,51 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Dtos;
+using AutoMapper;
 using MessageGenerator.MessageBodies;
 using MongoDB.Driver;
 
-namespace API.MongoDb{
+namespace API.MongoDb
+{
 
     public class WindService
     {
-        private readonly IMongoCollection<Wind> _collection;
+        private readonly IMongoCollection<WindDto> _collection;
+        private readonly IMapper _mapper;
 
-        public WindService(MongoDbSettings mongoDbSettings)
+        public WindService(MongoDbWindSettings mongoDbSettings, IMapper mapper)
         {
-            MongoClient client = new MongoClient(mongoDbSettings.ConnectionUri);
-            IMongoDatabase database = client.GetDatabase(mongoDbSettings.DatabaseName);
-            _collection = database.GetCollection<Wind>(mongoDbSettings.CollectionName);
+            _mapper = mapper;
+            var client = new MongoClient(mongoDbSettings.ConnectionUri);
+            var database = client.GetDatabase(mongoDbSettings.DatabaseName);
+            _collection = database.GetCollection<WindDto>(mongoDbSettings.CollectionName);
         }
 
-        public async Task<List<Wind>> GetAsync()
+        public async Task<List<WindDto>> GetAsync()
         {
-            return await _collection.FindAsync(FilterDefinition<Wind>.Empty).Result.ToListAsync();
+            return await _collection.FindAsync(FilterDefinition<WindDto>.Empty).Result.ToListAsync();
         }
 
+        public async Task<List<WindDto>> GetSensorDataAsync(int sensorId)
+        {
+            return await _collection.FindAsync(Builders<WindDto>.Filter.Eq(wind => wind.SensorId, sensorId )).Result.ToListAsync();
+        }
         public async Task InsertOneAsync(Wind wind)
         {
-            await _collection.InsertOneAsync(wind);
+            var dto = _mapper.Map<WindDto>(wind);
+
+            var indexOptions = new CreateIndexOptions();
+            var indexKeys = Builders<WindDto>.IndexKeys.Ascending(field => field.SensorId).Descending(field => field.Time);
+            var indexModel = new CreateIndexModel<WindDto>(indexKeys, indexOptions);
+            await _collection.Indexes.CreateOneAsync(indexModel);
+
+            await _collection.InsertOneAsync(dto);
         }
 
         public async Task DeleteAsync(string id)
         {
+            throw new NotImplementedException();
         }
     }
 }
