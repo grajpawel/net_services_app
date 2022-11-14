@@ -18,11 +18,13 @@ services:
       - MongoDbWindSettings__ConnectionUri=mongodb://root:root@mongo:27017
     ports:
       - 5001:5000
+
   net.services.dashboard:
     container_name: net.services.dashboard
     image: net.services.dashboard:latest
     ports:
       - 5002:5000
+      
     build:
       context: ../Dashboard
       dockerfile: Dockerfile
