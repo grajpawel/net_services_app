@@ -24,7 +24,7 @@ services:
     networks:
       - rabbitmq_go_net
     environment:
-      - AppOptions__RabbitMqUri=amqp://guest:guest@net.services.rabbitmq
+      - AppOptions__RabbitMqUri=amqp://guest:guest@net-services-rabbitmq
       - AppOptions__HumidityJobCron=0/10 * * * * ?
       - AppOptions__PressureJobCron=0/12 * * * * ?
       - AppOptions__TemperatureJobCron=0/14 * * * * ?
