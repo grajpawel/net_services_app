@@ -39,6 +39,10 @@ services:
       - rabbitmq_go_net
     environment:
       - AppOptions__RabbitMqUri=amqp://guest:guest@net.services.rabbitmq
+      - AppOptions__HumidityJobCron=0/10 * * * * ?
+      - AppOptions__PressureJobCron=0/12 * * * * ?
+      - AppOptions__TemperatureJobCron=0/14 * * * * ?
+      - AppOptions__WindJobCron=0/16 * * * * ?
 
   net.services.rabbitmq:
     container_name: net.services.rabbitmq
@@ -60,6 +64,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
     networks:
       - mongo_network
+
   mongo-express:
     container_name: mongo-express
     image: mongo-express

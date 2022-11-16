@@ -2,6 +2,7 @@
 using MassTransit;
 using MessageGenerator.Jobs;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 
@@ -21,6 +22,15 @@ namespace MessageGenerator
                 {
                     IConfiguration configuration = hostContext.Configuration;
                     var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>();
+                    var humidityValueSettings = configuration.GetSection(nameof(HumidityValueSettings)).Get<HumidityValueSettings>();
+                    var pressureValueSettings = configuration.GetSection(nameof(PressureValueSettings)).Get<PressureValueSettings>();
+                    var temperatureValueSettings = configuration.GetSection(nameof(TemperatureValueSettings)).Get<TemperatureValueSettings>();
+                    var windValueSettings = configuration.GetSection(nameof(WindValueSettings)).Get<WindValueSettings>();
+
+                    services.AddSingleton(humidityValueSettings);
+                    services.AddSingleton(pressureValueSettings);
+                    services.AddSingleton(temperatureValueSettings);
+                    services.AddSingleton(windValueSettings);
 
                     services.AddMassTransit(x =>
                     {
