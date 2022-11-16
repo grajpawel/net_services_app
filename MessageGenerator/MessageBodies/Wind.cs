@@ -7,9 +7,9 @@ namespace MessageGenerator.MessageBodies
         public int SensorId { get; }
         public DateTime Time { get; }
         public decimal Speed { get; }
-        public string Direction { get; }
+        public decimal Direction { get; }
 
-        public Wind(int sensorId, decimal speed, string direction)
+        public Wind(int sensorId, decimal speed, decimal direction)
         {
             SensorId = sensorId;
             Time = DateTime.UtcNow;

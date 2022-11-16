@@ -24,7 +24,7 @@ services:
     image: net.services.dashboard:latest
     ports:
       - 5002:5000
-      
+
     build:
       context: ../Dashboard
       dockerfile: Dockerfile
@@ -39,6 +39,20 @@ services:
       - rabbitmq_go_net
     environment:
       - AppOptions__RabbitMqUri=amqp://guest:guest@net.services.rabbitmq
+      - AppOptions__HumidityJobCron=0/10 * * * * ?
+      - AppOptions__PressureJobCron=0/12 * * * * ?
+      - AppOptions__TemperatureJobCron=0/14 * * * * ?
+      - AppOptions__WindJobCron=0/16 * * * * ?
+      - HumidityValueSettings__From=50
+      - HumidityValueSettings__To=90
+      - PressureValueSettings__From=980
+      - PressureValueSettings__To=1020
+      - TemperatureValueSettings__From=-10
+      - TemperatureValueSettings__To=20
+      - WindValueSettings__From=0
+      - WindValueSettings__To=10
+      - WindValueSettings__DegreeFrom=0
+      - WindValueSettings__DegreeTo=360
 
   net.services.rabbitmq:
     container_name: net.services.rabbitmq
@@ -60,6 +74,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
     networks:
       - mongo_network
+
   mongo-express:
     container_name: mongo-express
     image: mongo-express
