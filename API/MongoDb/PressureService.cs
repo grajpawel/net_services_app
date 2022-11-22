@@ -38,8 +38,18 @@ namespace API.MongoDb
             var indexOptions = new CreateIndexOptions();
             var indexKeys = Builders<PressureDto>.IndexKeys.Ascending(field => field.SensorId).Descending(field => field.Time);
             var indexModel = new CreateIndexModel<PressureDto>(indexKeys, indexOptions);
-            await _collection.Indexes.CreateOneAsync(indexModel);
 
+            var ttlIndexKeysDefinition = Builders<PressureDto>.IndexKeys.Ascending(field => field.Time);
+            var ttlIndexOptions = new CreateIndexOptions { ExpireAfter = new TimeSpan(24, 0, 0) };
+            var ttlIndexModel = new CreateIndexModel<PressureDto>(ttlIndexKeysDefinition, ttlIndexOptions);
+
+            var indexList = new List<CreateIndexModel<PressureDto>>
+            {
+                indexModel,
+                ttlIndexModel
+            };
+
+            await _collection.Indexes.CreateManyAsync(indexList);
             await _collection.InsertOneAsync(dto);
         }
 
