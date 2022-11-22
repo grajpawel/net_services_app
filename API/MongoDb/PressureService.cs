@@ -53,7 +53,7 @@ namespace API.MongoDb
             await _collection.InsertOneAsync(dto);
         }
 
-        public async Task DeleteAsync(string id)
+        public Task DeleteAsync(string id)
         {
             throw new NotImplementedException();
         }
