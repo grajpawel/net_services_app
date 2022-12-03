@@ -1,0 +1,79 @@
+@page "/sensors"
+
+@using Dashboard.Data
+@using Dashboard.Dtos
+@using System.Collections
+@inject TableController Controller
+
+<h1>Sensors data</h1>
+
+@if (_data == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table>
+        <thead>
+        <tr>
+            <th>sensor type</th>
+            <th>sensor id</th>
+            <th>read date</th>
+            <th>value</th>
+            <th>direction</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var h in _data)
+        {
+            <tr>
+                <td>@h.type</td>
+                <td>@h.SensorId</td>
+                <td>@h.Time</td>
+                <td>@h.Value</td>
+                @if (h.Direction != -1)
+                {
+                    <td>@h.Direction</td>
+                }
+                else
+                {
+                    <td>N.D.</td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+    
+    <style>
+        table {
+            border-collapse: collapse;
+            margin:  0 1px 20px 1px;
+            text-align: center;
+        }
+        
+        td {
+            border: 5px solid black;
+            width: 100px;
+        }
+        
+        th {
+            background-color: yellow;
+            padding: 5px;
+            border:  5px solid black;
+        }
+    </style>
+}
+
+
+@code
+{
+    private List<ISensorDto> _data;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // _data = await _controller.FetchData();
+        _data = await Controller.SortByDate(false);
+    }
+}
