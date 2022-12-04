@@ -3,6 +3,7 @@
 @using Dashboard.Data
 @using Dashboard.Dtos
 @using System.Collections
+@using ChartJs.Blazor.BarChart
 @inject TableController Controller
 
 <h1>Sensors data</h1>
@@ -15,18 +16,40 @@
 }
 else
 {
+    <Chart Config="_barConfig" @ref="_chart"></Chart>
     <table>
         <thead>
         <tr>
-            <th>sensor type</th>
-            <th>sensor id</th>
+                <th>
+                    sensor type
+                    <form method ="post">
+                        <select name="number" @bind="CheckType">
+                            <option value="">Select a filter</option>
+                            @foreach (var type in _data.Select(x => x.type).Distinct())
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </form>
+                </th>
+            <th>sensor id
+                    <form method="post">
+                        <select name="number" @bind="CheckID">
+                            <option value=-1>Select an ID</option>
+                            @foreach(var id in _data.Select(x => x.SensorId).Distinct().OrderBy(x => x))
+                            {
+                                <option value=@id>@id</option>
+                            }
+                        </select>
+                    </form>
+            </th>
             <th>read date</th>
             <th>value</th>
             <th>direction</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var h in _data)
+        @foreach (var h in @_filteredData)
         {
             <tr>
                 <td>@h.type</td>
@@ -71,9 +94,136 @@ else
 {
     private List<ISensorDto> _data;
 
+    private List<ISensorDto> _filteredData;
+
+    private BarConfig _barConfig;
+
+    private Chart _chart;
+
+    public enum FilterType
+    {
+        Type,
+        ID,
+        Date
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        // _data = await _controller.FetchData();
+        // _data = await Controller.FetchData();
         _data = await Controller.SortByDate(false);
+        _filteredData = _data;
+        ConfigurePieConfig();
+    }
+
+    private void ConfigurePieConfig()
+    {
+        _barConfig = new BarConfig();
+
+        _barConfig.Options = new BarOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Average values of sensors"
+                },
+                Legend = new Legend
+                {
+                    Position = Position.Top
+                }
+            };
+        _barConfig.Data.Datasets.Clear();
+        _barConfig.Data.Labels.Clear();
+        foreach (var id in _filteredData.Select(x => x.SensorId).Distinct().OrderBy(x => x))
+        {
+            var data = _filteredData.Where(x => x.SensorId.Equals(id));
+            List<decimal> typeData = new List<decimal>();
+            foreach (var type in data.Select(x => x.type).Distinct())
+            {
+                typeData.Add(data.Where(x => x.type.Equals(type)).Select(x => x.Value).Average());
+            }
+            IDataset<decimal> dataset = new BarDataset<decimal>(typeData)
+                {
+                    Label = id.ToString(),
+
+                    BackgroundColor = ColorUtil.RandomColorString()
+                };
+            _barConfig.Data.Datasets.Add(dataset);
+
+        }
+        foreach (var type in _filteredData.Select(x => x.type).Distinct())
+        {
+            _barConfig.Data.Labels.Add(type);
+
+        }
+    }
+
+    private void UpdatePieConfig()
+    {
+        _barConfig.Data.Datasets.Clear();
+        _barConfig.Data.Labels.Clear();
+        foreach (var id in _filteredData.Select(x => x.SensorId).Distinct().OrderBy(x => x))
+        {
+            var data = _filteredData.Where(x => x.SensorId.Equals(id));
+            List<decimal> typeData = new List<decimal>();
+            foreach (var type in data.Select(x => x.type).Distinct())
+            {
+                typeData.Add(data.Where(x => x.type.Equals(type)).Select(x => x.Value).Average());
+            }
+            IDataset<decimal> dataset = new BarDataset<decimal>(typeData)
+                {
+                    Label = id.ToString(),
+
+                    BackgroundColor = ColorUtil.RandomColorString()
+                };
+            _barConfig.Data.Datasets.Add(dataset);
+
+        }
+        foreach (var type in _filteredData.Select(x => x.type).Distinct())
+        {
+            _barConfig.Data.Labels.Add(type);
+
+        }
+        _chart.Update();
+    }
+
+    public string SelectedType { get; set; } = "";
+    private string CheckType
+    {
+        get
+        {
+            return SelectedType;
+        }
+        set
+        {
+            ChangeEventArgs selectedEventArgs = new ChangeEventArgs();
+            selectedEventArgs.Value = value;
+            SelectedType = selectedEventArgs.Value.ToString();
+            SendFilters();
+        }
+    }
+
+    public int SelectedID { get; set; } = -1;
+    private int CheckID
+    {
+        get
+        {
+            return SelectedID;
+        }
+        set
+        {
+            ChangeEventArgs selectedEventArgs = new ChangeEventArgs();
+            selectedEventArgs.Value = value;
+            if (selectedEventArgs.Value.ToString() != string.Empty)
+            {
+                SelectedID = int.Parse(selectedEventArgs.Value.ToString());
+            }
+            SendFilters();
+        }
+    }
+    protected async Task SendFilters()
+    {
+        _filteredData = await Controller.ApplyFilters(SelectedType, SelectedID);
+        UpdatePieConfig();
     }
 }

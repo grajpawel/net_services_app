@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dashboard.Dtos;
 
@@ -87,6 +88,28 @@ public class TableController
             tmp.Sort((a, b) => - a.Time.CompareTo(b.Time));
         }
 
+
         return tmp;
     }
+
+    public async Task<List<ISensorDto>> ApplyFilters(string SelectedType = "", int SelectedId = -1)
+    {
+        if (_list == null)
+        {
+            await FetchData();
+        }
+        List<ISensorDto> tmp = new(_list);
+
+        if (!String.IsNullOrEmpty(SelectedType))
+        {
+            tmp = tmp.Where(f => f.type == SelectedType).ToList();
+        }
+        if (SelectedId > -1)
+        {
+            tmp = tmp.Where(f => f.SensorId == SelectedId).ToList();
+        }
+
+        return tmp;
+    }
+
 }

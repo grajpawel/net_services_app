@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Dashboard.Dtos;
-using MessageGenerator.MessageBodies;
+//using MessageGenerator.MessageBodies;
 
 namespace Dashboard.Data;
 
@@ -18,7 +18,7 @@ public class SensorsService
 
     public async Task<List<HumidityDto>> GetHumidityData()
     {
-        using HttpResponseMessage response = await _client.GetAsync("http://localhost:5001/api/Humidity");
+        using HttpResponseMessage response = await _client.GetAsync("http://host.docker.internal:5001/api/Humidity");
 
         response.EnsureSuccessStatusCode();
 
@@ -29,7 +29,7 @@ public class SensorsService
 
     public async Task<List<PressureDto>> GetPressureData()
     {
-        using HttpResponseMessage response = await _client.GetAsync("http://localhost:5001/api/Pressure");
+        using HttpResponseMessage response = await _client.GetAsync("http://host.docker.internal:5001/api/Pressure");
 
         response.EnsureSuccessStatusCode();
 
@@ -40,7 +40,7 @@ public class SensorsService
 
     public async Task<List<TemperatureDto>> GetTemperatureData()
     {
-        using HttpResponseMessage response = await _client.GetAsync("http://localhost:5001/api/Temperature");
+        using HttpResponseMessage response = await _client.GetAsync("http://host.docker.internal:5001/api/Temperature");
 
         response.EnsureSuccessStatusCode();
 
@@ -51,7 +51,7 @@ public class SensorsService
 
     public async Task<List<WindDto>> GetWindData()
     {
-        using HttpResponseMessage response = await _client.GetAsync("http://localhost:5001/api/Wind");
+        using HttpResponseMessage response = await _client.GetAsync("http://host.docker.internal:5001/api/Wind");
 
         response.EnsureSuccessStatusCode();
 
