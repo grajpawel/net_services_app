@@ -10,6 +10,7 @@ services:
     networks:
       - rabbitmq_go_net
       - mongo_network
+      - api_network
     environment:
       - AppOptions__RabbitMqUri=amqp://guest:guest@net.services.rabbitmq
       - MongoDbHumiditySettings__ConnectionUri=mongodb://root:root@mongo:27017
@@ -24,10 +25,16 @@ services:
     image: net.services.dashboard:latest
     ports:
       - 5002:5000
-
     build:
       context: ../Dashboard
       dockerfile: Dockerfile
+    networks:
+      - api_network
+    environment:
+      - AppOptions__HumidityApiLink=http://net.services.api:5000/api/Humidity
+      - AppOptions__PressureApiLink=http://net.services.api:5000/api/Pressure
+      - AppOptions__TemperatureApiLink=http://net.services.api:5000/api/Temperature
+      - AppOptions__WindApiLink=http://net.services.api:5000/api/Wind
 
   net.services.messagegenerator:
     container_name: net.services.messagegenerator
@@ -90,3 +97,4 @@ services:
 networks:
   rabbitmq_go_net:
   mongo_network:
+  api_network:
