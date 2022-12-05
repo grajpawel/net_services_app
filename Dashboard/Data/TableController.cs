@@ -8,7 +8,7 @@ namespace Dashboard.Data;
 
 public class TableController
 {
-    private SensorsService _service;
+    private readonly SensorsService _service;
 
     private List<ISensorDto> _list;
 
