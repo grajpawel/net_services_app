@@ -14,6 +14,7 @@ namespace Dashboard.Dtos
         
         [JsonPropertyName("time")]
         public DateTime Time { get; set; }
+        
         [JsonPropertyName("value")]
         public decimal Value { get; set; }
 

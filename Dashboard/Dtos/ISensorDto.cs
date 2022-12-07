@@ -4,8 +4,7 @@ namespace Dashboard.Dtos;
 
 public interface ISensorDto
 {
-    public string _id { get; set; }
-    
+
     public string type { get; set; }
     
     public int SensorId { get; set; }
