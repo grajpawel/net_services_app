@@ -92,7 +92,7 @@ public class TableController
         return tmp;
     }
 
-    public async Task<List<ISensorDto>> ApplyFilters(string SelectedType = "", int SelectedId = -1)
+    public async Task<List<ISensorDto>> ApplyFilters(string SelectedType = "", int SelectedId = -1, DateTime? after = null, DateTime? before = null)
     {
         if (_list == null)
         {
@@ -108,6 +108,18 @@ public class TableController
         {
             tmp = tmp.Where(f => f.SensorId == SelectedId).ToList();
         }
+
+        if (!after.HasValue)
+        {
+            after = DateTime.MinValue;
+        }
+
+        if (!before.HasValue)
+        {
+            before = DateTime.MaxValue;
+        }
+
+        tmp = tmp.FindAll(i => i.Time > after && i.Time < before);
 
         return tmp;
     }
