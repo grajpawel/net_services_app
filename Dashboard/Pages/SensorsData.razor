@@ -55,7 +55,29 @@ else
                         </select>
                     </form>
             </th>
-            <th>read date</th>
+            <th>read date
+                <form method="post">
+                    <select name="number" @bind="CheckAfter">
+                        <option value="@DateTime.MinValue">after</option>
+                        @foreach (var date in _data.Select(x => x.Time).Distinct().OrderBy(x => x))
+                        {
+                            <option value="@date">@date</option>
+                        }
+                    </select>
+                </form>
+                
+                <br/>
+                
+                <form method="post">
+                    <select name="number" @bind="CheckBefore">
+                        <option value="@DateTime.MaxValue">before</option>
+                        @foreach (var date in _data.Select(x => x.Time).Distinct().OrderBy(x => x))
+                        {
+                            <option value="@date">@date</option>
+                        }
+                    </select>
+                </form>
+            </th>
             <th>value</th>
             <th>direction</th>
         </tr>
@@ -214,6 +236,34 @@ else
             SendFilters();
         }
     }
+    
+    public DateTime SelectedAfter { get; set; } = DateTime.MinValue;
+
+    private DateTime CheckAfter
+    {
+        get { return SelectedAfter; }
+        set
+        {
+            ChangeEventArgs selectedEventArgs = new ChangeEventArgs();
+            selectedEventArgs.Value = value;
+            SelectedAfter = (DateTime)selectedEventArgs.Value;
+            SendFilters();
+        }
+    }
+
+    public DateTime SelectedBefore { get; set; } = DateTime.MaxValue;
+
+    private DateTime CheckBefore
+    {
+        get { return SelectedBefore; }
+        set
+        {
+            ChangeEventArgs selectedEventArgs = new ChangeEventArgs();
+            selectedEventArgs.Value = value;
+            SelectedBefore = (DateTime)selectedEventArgs.Value;
+            SendFilters();
+        }
+    }
 
     public int SelectedID { get; set; } = -1;
     private int CheckID
@@ -235,7 +285,7 @@ else
     }
     protected async Task SendFilters()
     {
-        _filteredData = await Controller.ApplyFilters(SelectedType, SelectedID);
+        _filteredData = await Controller.ApplyFilters(SelectedType, SelectedID, SelectedAfter);
         UpdatePieConfig();
     }
 
