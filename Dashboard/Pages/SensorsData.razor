@@ -32,7 +32,7 @@ else
         <thead>
         <tr>
                 <th>
-                    sensor type
+                    <span @onclick="SortByType">sensor type</span>
                     <form method ="post">
                         <select name="number" @bind="CheckType">
                             <option value="">Select a filter</option>
@@ -45,21 +45,23 @@ else
                         </select>
                     </form>
                 </th>
-            <th>sensor id
-                    <form method="post">
-                        <select name="number" @bind="CheckId">
-                            <option value=-1>Select an ID</option>
-                            @foreach(var id in _data
-                                .Select(x => x.SensorId)
-                                .Distinct()
-                                .OrderBy(x => x))
-                            {
-                                <option value=@id>@id</option>
-                            }
-                        </select>
-                    </form>
+            <th>
+                <span @onclick="SortById">sensor id</span>
+                <form method="post">
+                    <select name="number" @bind="CheckId">
+                        <option value=-1>Select an ID</option>
+                        @foreach (var id in _data
+                            .Select(x => x.SensorId)
+                            .Distinct()
+                            .OrderBy(x => x))
+                        {
+                            <option value=@id>@id</option>
+                        }
+                    </select>
+                </form>
             </th>
-            <th>read date
+            <th>
+                <span @onclick="SortByDate">read date</span>
                 <form method="post">
                     <select name="number" @bind="CheckAfter">
                         <option value="@DateTime.MinValue">after</option>
@@ -72,9 +74,9 @@ else
                         }
                     </select>
                 </form>
-                
+
                 <br/>
-                
+
                 <form method="post">
                     <select name="number" @bind="CheckBefore">
                         <option value="@DateTime.MaxValue">before</option>
@@ -88,7 +90,9 @@ else
                     </select>
                 </form>
             </th>
-            <th>value</th>
+            <th>
+                <span @onclick="SortByValue">value</span>
+            </th>
             <th>direction</th>
         </tr>
         </thead>
@@ -136,13 +140,18 @@ else
 
 @code
 {
-    private IList<ISensorDto> _data;
+    private List<ISensorDto> _data;
 
-    private IList<ISensorDto> _filteredData;
+    private List<ISensorDto> _filteredData;
 
     private BarConfig _barConfig;
 
     private Chart _chart;
+
+    private bool _sortByTypeAscending;
+    private bool _sortByIdAscending;
+    private bool _sortByDateAscending;
+    private bool _sortByValueAscending;
 
     public enum FilterType
     {
@@ -218,8 +227,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // _data = await Controller.FetchData();
-        _data = await Controller.SortByDate(false);
+        _data = await Controller.FetchData();
+        _data = await Controller.SortByDate(_data, false);
         _filteredData = _data;
         ConfigurePieConfig();
     }
@@ -247,7 +256,7 @@ else
         _barConfig.Data.Labels.Clear();
         foreach (var id in _filteredData.Select(x => x.SensorId).Distinct().OrderBy(x => x))
         {
-            var data = _filteredData.Where(x => x.SensorId.Equals(id));
+            var data = _filteredData.Where(x => x.SensorId.Equals(id)).ToList();
             List<decimal> typeData = new List<decimal>();
             foreach (var type in data.Select(x => x.type).Distinct())
             {
@@ -275,7 +284,7 @@ else
         _barConfig.Data.Labels.Clear();
         foreach (var id in _filteredData.Select(x => x.SensorId).Distinct().OrderBy(x => x))
         {
-            var data = _filteredData.Where(x => x.SensorId.Equals(id));
+            var data = _filteredData.Where(x => x.SensorId.Equals(id)).ToList();
             List<decimal> typeData = new List<decimal>();
             foreach (var type in data.Select(x => x.type).Distinct())
             {
@@ -354,5 +363,33 @@ else
 
         using var streamRef = new DotNetStreamReference(stream: stream);
         await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
+
+    private async Task SortByType()
+    {
+        _sortByTypeAscending = !_sortByTypeAscending;
+        _filteredData = await Controller.SortBySensorType(_filteredData, _sortByTypeAscending);
+        StateHasChanged();
+    }
+
+    private async Task SortById()
+    {
+        _sortByIdAscending = !_sortByIdAscending;
+        _filteredData = await Controller.SortBySensorId(_filteredData, _sortByIdAscending);
+        StateHasChanged();
+    }
+
+    private async Task SortByDate()
+    {
+        _sortByDateAscending = !_sortByDateAscending;
+        _filteredData = await Controller.SortByDate(_filteredData, _sortByDateAscending);
+        StateHasChanged();
+    }
+
+    private async Task SortByValue()
+    {
+        _sortByValueAscending = !_sortByValueAscending;
+        _filteredData = await Controller.SortByValue(_filteredData, _sortByValueAscending);
+        StateHasChanged();
     }
 }
