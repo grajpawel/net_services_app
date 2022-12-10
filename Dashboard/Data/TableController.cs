@@ -92,7 +92,7 @@ public class TableController
         return tmp;
     }
 
-    public async Task<List<ISensorDto>> ApplyFilters(string SelectedType = "", int SelectedId = -1, DateTime? after = null, DateTime? before = null)
+    public async Task<List<ISensorDto>> ApplyFilters(string selectedType = "", int selectedId = -1, DateTime? after = null, DateTime? before = null)
     {
         if (_list == null)
         {
@@ -100,28 +100,26 @@ public class TableController
         }
         List<ISensorDto> tmp = new(_list);
 
-        if (!String.IsNullOrEmpty(SelectedType))
+        if (!String.IsNullOrEmpty(selectedType))
         {
-            tmp = tmp.Where(f => f.type == SelectedType).ToList();
+            tmp = tmp.Where(f => f.type == selectedType).ToList();
         }
-        if (SelectedId > -1)
+        if (selectedId > -1)
         {
-            tmp = tmp.Where(f => f.SensorId == SelectedId).ToList();
-        }
-
-        if (!after.HasValue)
-        {
-            after = DateTime.MinValue;
+            tmp = tmp.Where(f => f.SensorId == selectedId).ToList();
         }
 
-        if (!before.HasValue)
-        {
-            before = DateTime.MaxValue;
-        }
-
-        tmp = tmp.FindAll(i => i.Time > after && i.Time < before);
+        tmp = tmp.FindAll(
+            i => RoundToSeconds(i.Time) >= RoundToSeconds(after ?? DateTime.MinValue)
+                 && RoundToSeconds(i.Time) <= RoundToSeconds(before ?? DateTime.MaxValue)
+                 );
 
         return tmp;
+    }
+
+    private static DateTime RoundToSeconds(DateTime dt)
+    {
+        return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
     }
 
 }
