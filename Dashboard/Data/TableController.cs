@@ -30,14 +30,16 @@ public class TableController
         return _list;
     }
 
-    public async Task<List<ISensorDto>> SortBySensorType(bool ascending = true)
+    public async Task<List<ISensorDto>> SortBySensorType(IList<ISensorDto> l = null, bool ascending = true)
     {
         if (_list == null)
         {
             await FetchData();
         }
 
-        List<ISensorDto> tmp = new(_list);
+        l ??= _list;
+
+        List<ISensorDto> tmp = new(l ?? throw new ArgumentNullException(nameof(l)));
         if (ascending)
         {
             tmp.Sort((a, b) => String.Compare(a.type, b.type, StringComparison.CurrentCulture));
@@ -49,14 +51,16 @@ public class TableController
 
         return tmp;
     }
-    public async Task<List<ISensorDto>> SortBySensorId(bool ascending = true)
+    public async Task<List<ISensorDto>> SortBySensorId(IList<ISensorDto> l = null, bool ascending = true)
     {
         if (_list == null)
         {
             await FetchData();
         }
 
-        List<ISensorDto> tmp = new List<ISensorDto>(_list);
+        l ??= _list;
+
+        List<ISensorDto> tmp = new(l ?? throw new ArgumentNullException(nameof(l)));
 
         if (ascending)
         {
@@ -70,14 +74,16 @@ public class TableController
         return tmp;
     }
 
-    public async Task<List<ISensorDto>> SortByDate(bool ascending = true)
+    public async Task<List<ISensorDto>> SortByDate(IList<ISensorDto> l = null, bool ascending = true)
     {
         if (_list == null)
         {
             await FetchData();
         }
 
-        List<ISensorDto> tmp = new(_list);
+        l ??= _list;
+
+        List<ISensorDto> tmp = new(l ?? throw new ArgumentNullException(nameof(l)));
 
         if (ascending)
         {
@@ -92,13 +98,36 @@ public class TableController
         return tmp;
     }
 
+    public async Task<List<ISensorDto>> SortByValue(IList<ISensorDto> l = null, bool ascending = true)
+    {
+        if (_list == null)
+        {
+            await FetchData();
+        }
+
+        l ??= _list;
+
+        List<ISensorDto> tmp = new(l ?? throw new ArgumentNullException(nameof(l)));
+
+        if (ascending)
+        {
+            tmp.Sort((a, b) => a.Value.CompareTo(b.Value));
+        }
+        else
+        {
+            tmp.Sort((a, b) => - a.Value.CompareTo(b.Value));
+        }
+
+        return tmp;
+    }
+
     public async Task<List<ISensorDto>> ApplyFilters(string selectedType = "", int selectedId = -1, DateTime? after = null, DateTime? before = null)
     {
         if (_list == null)
         {
             await FetchData();
         }
-        List<ISensorDto> tmp = new(_list);
+        List<ISensorDto> tmp = new(_list ?? throw new InvalidOperationException());
 
         if (!String.IsNullOrEmpty(selectedType))
         {
