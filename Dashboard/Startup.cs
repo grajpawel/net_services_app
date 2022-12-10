@@ -25,6 +25,7 @@ namespace Dashboard
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddControllersWithViews();
             services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<HttpClient>();
             services.AddSingleton<SensorsService>();
