@@ -46,7 +46,7 @@ public class DownloadController
         foreach (var record in currentData)
         {
             var direction = record.Direction == -1 ? "N.D" : record.Direction.ToString(CultureInfo.CurrentCulture);
-            var line = $"{record.type};{record.SensorId};{record.Time};{record.Value};{direction}";
+            var line = $"{record.Type};{record.SensorId};{record.Time};{record.Value};{direction}";
             csv.AppendLine(line);
         }
         return csv.ToString();

@@ -31,7 +31,7 @@ else
                         <select name="number" @bind="DataModel.CheckType">
                             <option value="">Select a filter</option>
                             @foreach (var type in DataModel.AllSensorsRecords
-                                .Select(x => x.type)
+                                .Select(x => x.Type)
                                 .Distinct())
                             {
                                 <option value="@type">@type</option>
@@ -94,7 +94,7 @@ else
         @foreach (var h in DataModel.FilteredSensorsRecords)
         {
             <tr>
-                <td>@h.type</td>
+                <td>@h.Type</td>
                 <td>@h.SensorId</td>
                 <td>@h.Time</td>
                 <td>@h.Value</td>

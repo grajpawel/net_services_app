@@ -23,9 +23,9 @@ public class ChartController
         {
             var data = pieData.Where(x => x.SensorId.Equals(id)).ToList();
             var typeData = new List<decimal>();
-            foreach (var type in data.Select(x => x.type).Distinct())
+            foreach (var type in data.Select(x => x.Type).Distinct())
             {
-                typeData.Add(data.Where(x => x.type.Equals(type)).Select(x => x.Value).Average());
+                typeData.Add(data.Where(x => x.Type.Equals(type)).Select(x => x.Value).Average());
             }
             IDataset<decimal> dataset = new BarDataset<decimal>(typeData)
             {
@@ -36,7 +36,7 @@ public class ChartController
             BarConfig.Data.Datasets.Add(dataset);
 
         }
-        foreach (var type in pieData.Select(x => x.type).Distinct())
+        foreach (var type in pieData.Select(x => x.Type).Distinct())
         {
             BarConfig.Data.Labels.Add(type);
 
@@ -69,9 +69,9 @@ public class ChartController
         {
             var data = pieData.Where(x => x.SensorId.Equals(id)).ToList();
             var typeData = new List<decimal>();
-            foreach (var type in data.Select(x => x.type).Distinct())
+            foreach (var type in data.Select(x => x.Type).Distinct())
             {
-                typeData.Add(data.Where(x => x.type.Equals(type)).Select(x => x.Value).Average());
+                typeData.Add(data.Where(x => x.Type.Equals(type)).Select(x => x.Value).Average());
             }
             IDataset<decimal> dataset = new BarDataset<decimal>(typeData)
             {
@@ -82,7 +82,7 @@ public class ChartController
             BarConfig.Data.Datasets.Add(dataset);
 
         }
-        foreach (var type in pieData.Select(x => x.type).Distinct())
+        foreach (var type in pieData.Select(x => x.Type).Distinct())
         {
             BarConfig.Data.Labels.Add(type);
         }

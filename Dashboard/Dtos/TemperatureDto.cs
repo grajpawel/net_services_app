@@ -7,7 +7,7 @@ namespace Dashboard.Dtos
     {
         public string _id { get; set; }
         
-        public string type { get; set; }
+        public string Type { get; set; }
 
         [JsonPropertyName("sensorId")]
         public int SensorId { get; set; }
@@ -26,7 +26,7 @@ namespace Dashboard.Dtos
             Time = DateTime.UtcNow;
             Value = value;
             Direction = -1;
-            type = "Temperature Sensor";
+            Type = "Temperature Sensor";
         }
 
         public override string ToString()

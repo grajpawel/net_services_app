@@ -41,11 +41,11 @@ public class TableController
         List<ISensorDto> tmp = new(l ?? throw new ArgumentNullException(nameof(l)));
         if (ascending)
         {
-            tmp.Sort((a, b) => String.Compare(a.type, b.type, StringComparison.CurrentCulture));
+            tmp.Sort((a, b) => String.Compare(a.Type, b.Type, StringComparison.CurrentCulture));
         }
         else
         {
-            tmp.Sort((a, b) => - String.Compare(a.type, b.type, StringComparison.CurrentCulture));
+            tmp.Sort((a, b) => - String.Compare(a.Type, b.Type, StringComparison.CurrentCulture));
         }
 
         return tmp;
@@ -130,7 +130,7 @@ public class TableController
 
         if (!String.IsNullOrEmpty(selectedType))
         {
-            tmp = tmp.Where(f => f.type == selectedType).ToList();
+            tmp = tmp.Where(f => f.Type == selectedType).ToList();
         }
         if (selectedId > -1)
         {
