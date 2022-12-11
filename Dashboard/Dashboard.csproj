@@ -6,4 +6,16 @@
         <LangVersion>10</LangVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="ChartJs.Blazor.Fork" Version="2.0.2" />
+	</ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\API\API.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="wwwroot\downloadFile.js" />
+    </ItemGroup>
+
 </Project>

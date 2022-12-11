@@ -1,0 +1,144 @@
+@page "/sensors"
+
+@using Dashboard.Dtos
+@using Dashboard.Models
+@inject SensorsDataModel DataModel
+
+<h1>Sensors data</h1>
+
+@if (_data == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <Chart Config="DataModel.BarConfig" @ref="DataModel.Chart"></Chart>
+    
+    <br/>
+    <button @onclick="DataModel.DownloadCsv">Download CSV</button>
+    <button @onclick="DataModel.DownloadJson">Download JSON</button>
+    <br/>
+    <br/>
+    
+    <table>
+        <thead>
+        <tr>
+                <th>
+                    <span @onclick="DataModel.SortByType">sensor type</span>
+                    <form method ="post">
+                        <select name="number" @bind="DataModel.CheckType">
+                            <option value="">Select a filter</option>
+                            @foreach (var type in DataModel.AllSensorsRecords
+                                .Select(x => x.Type)
+                                .Distinct())
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </form>
+                </th>
+            <th>
+                <span @onclick="DataModel.SortById">sensor id</span>
+                <form method="post">
+                    <select name="number" @bind="DataModel.CheckId">
+                        <option value=-1>Select an ID</option>
+                        @foreach (var id in DataModel.AllSensorsRecords
+                            .Select(x => x.SensorId)
+                            .Distinct()
+                            .OrderBy(x => x))
+                        {
+                            <option value=@id>@id</option>
+                        }
+                    </select>
+                </form>
+            </th>
+            <th>
+                <span @onclick="DataModel.SortByDate">read date</span>
+                <form method="post">
+                    <select name="number" @bind="DataModel.CheckAfter">
+                        <option value="@DateTime.MinValue">after</option>
+                        @foreach (var date in DataModel.AllSensorsRecords
+                            .Select(x => x.Time)
+                            .DistinctBy(x => x.ToLongTimeString())
+                            .OrderBy(x => x))
+                        {
+                            <option value="@date">@date</option>
+                        }
+                    </select>
+                </form>
+
+                <br/>
+
+                <form method="post">
+                    <select name="number" @bind="DataModel.CheckBefore">
+                        <option value="@DateTime.MaxValue">before</option>
+                        @foreach (var date in DataModel.AllSensorsRecords
+                            .Select(x => x.Time)
+                            .DistinctBy(x => x.ToLongTimeString())
+                            .OrderBy(x => x))
+                        {
+                            <option value="@date">@date</option>
+                        }
+                    </select>
+                </form>
+            </th>
+            <th>
+                <span @onclick="DataModel.SortByValue">value</span>
+            </th>
+            <th>direction</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var h in DataModel.FilteredSensorsRecords)
+        {
+            <tr>
+                <td>@h.Type</td>
+                <td>@h.SensorId</td>
+                <td>@h.Time</td>
+                <td>@h.Value</td>
+                @if (h.Direction != -1)
+                {
+                    <td>@h.Direction</td>
+                }
+                else
+                {
+                    <td>N.D.</td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+    
+    <style>
+        table {
+            border-collapse: collapse;
+            margin:  0 1px 20px 1px;
+            text-align: center;
+        }
+        
+        td {
+            border: 5px solid black;
+            width: 100px;
+        }
+        
+        th {
+            background-color: yellow;
+            padding: 5px;
+            border:  5px solid black;
+        }
+    </style>
+}
+
+
+@code
+{
+    private IList<ISensorDto> _data;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await DataModel.Init();
+        _data = DataModel.AllSensorsRecords;
+    }
+}
