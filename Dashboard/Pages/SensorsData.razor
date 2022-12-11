@@ -1,14 +1,8 @@
 @page "/sensors"
 
-@using System.Text.Json
-@using Dashboard.Data
 @using Dashboard.Dtos
-@using System.Globalization
-@using System.IO
-@using System.Text
-@using ChartJs.Blazor.BarChart
-@inject TableController Controller
-@inject IJSRuntime JsRuntime
+@using Dashboard.Models
+@inject SensorsDataModel DataModel
 
 <h1>Sensors data</h1>
 
@@ -20,11 +14,11 @@
 }
 else
 {
-    <Chart Config="_barConfig" @ref="_chart"></Chart>
+    <Chart Config="DataModel.BarConfig" @ref="DataModel.Chart"></Chart>
     
     <br/>
-    <button @onclick="DownloadCsv">Download CSV</button>
-    <button @onclick="DownloadJson">Download JSON</button>
+    <button @onclick="DataModel.DownloadCsv">Download CSV</button>
+    <button @onclick="DataModel.DownloadJson">Download JSON</button>
     <br/>
     <br/>
     
@@ -32,11 +26,11 @@ else
         <thead>
         <tr>
                 <th>
-                    <span @onclick="SortByType">sensor type</span>
+                    <span @onclick="DataModel.SortByType">sensor type</span>
                     <form method ="post">
-                        <select name="number" @bind="CheckType">
+                        <select name="number" @bind="DataModel.CheckType">
                             <option value="">Select a filter</option>
-                            @foreach (var type in _data
+                            @foreach (var type in DataModel.AllSensorsRecords
                                 .Select(x => x.type)
                                 .Distinct())
                             {
@@ -46,11 +40,11 @@ else
                     </form>
                 </th>
             <th>
-                <span @onclick="SortById">sensor id</span>
+                <span @onclick="DataModel.SortById">sensor id</span>
                 <form method="post">
-                    <select name="number" @bind="CheckId">
+                    <select name="number" @bind="DataModel.CheckId">
                         <option value=-1>Select an ID</option>
-                        @foreach (var id in _data
+                        @foreach (var id in DataModel.AllSensorsRecords
                             .Select(x => x.SensorId)
                             .Distinct()
                             .OrderBy(x => x))
@@ -61,11 +55,11 @@ else
                 </form>
             </th>
             <th>
-                <span @onclick="SortByDate">read date</span>
+                <span @onclick="DataModel.SortByDate">read date</span>
                 <form method="post">
-                    <select name="number" @bind="CheckAfter">
+                    <select name="number" @bind="DataModel.CheckAfter">
                         <option value="@DateTime.MinValue">after</option>
-                        @foreach (var date in _data
+                        @foreach (var date in DataModel.AllSensorsRecords
                             .Select(x => x.Time)
                             .DistinctBy(x => x.ToLongTimeString())
                             .OrderBy(x => x))
@@ -78,9 +72,9 @@ else
                 <br/>
 
                 <form method="post">
-                    <select name="number" @bind="CheckBefore">
+                    <select name="number" @bind="DataModel.CheckBefore">
                         <option value="@DateTime.MaxValue">before</option>
-                        @foreach (var date in _data
+                        @foreach (var date in DataModel.AllSensorsRecords
                             .Select(x => x.Time)
                             .DistinctBy(x => x.ToLongTimeString())
                             .OrderBy(x => x))
@@ -91,13 +85,13 @@ else
                 </form>
             </th>
             <th>
-                <span @onclick="SortByValue">value</span>
+                <span @onclick="DataModel.SortByValue">value</span>
             </th>
             <th>direction</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var h in @_filteredData)
+        @foreach (var h in DataModel.FilteredSensorsRecords)
         {
             <tr>
                 <td>@h.type</td>
@@ -140,256 +134,11 @@ else
 
 @code
 {
-    private List<ISensorDto> _data;
-
-    private List<ISensorDto> _filteredData;
-
-    private BarConfig _barConfig;
-
-    private Chart _chart;
-
-    private bool _sortByTypeAscending;
-    private bool _sortByIdAscending;
-    private bool _sortByDateAscending;
-    private bool _sortByValueAscending;
-
-    public enum FilterType
-    {
-        Type,
-        Id,
-        Date
-    }
-    
-    private string SelectedType { get; set; } = "";
-    private string CheckType
-    {
-        get => SelectedType;
-        set
-        {
-            ChangeEventArgs selectedEventArgs = new ChangeEventArgs
-            {
-                Value = value
-            };
-            SelectedType = selectedEventArgs.Value.ToString();
-            SendFilters();
-        }
-    }
-    
-    private DateTime SelectedAfter { get; set; } = DateTime.MinValue;
-
-    private DateTime CheckAfter
-    {
-        get => SelectedAfter;
-        set
-        {
-            ChangeEventArgs selectedEventArgs = new ChangeEventArgs
-            {
-                Value = value
-            };
-            SelectedAfter = (DateTime)selectedEventArgs.Value;
-            SendFilters();
-        }
-    }
-
-    private DateTime SelectedBefore { get; set; } = DateTime.MaxValue;
-
-    private DateTime CheckBefore
-    {
-        get => SelectedBefore;
-        set
-        {
-            ChangeEventArgs selectedEventArgs = new ChangeEventArgs
-            {
-                Value = value
-            };
-            SelectedBefore = (DateTime)selectedEventArgs.Value;
-            SendFilters();
-        }
-    }
-
-    private int SelectedId { get; set; } = -1;
-    private int CheckId
-    {
-        get => SelectedId;
-        set
-        {
-            ChangeEventArgs selectedEventArgs = new ChangeEventArgs
-            {
-                Value = value
-            };
-            if (selectedEventArgs.Value.ToString() != string.Empty)
-            {
-                SelectedId = int.Parse(selectedEventArgs.Value.ToString() ?? string.Empty);
-            }
-            SendFilters();
-        }
-    }
+    private IList<ISensorDto> _data;
 
     protected override async Task OnInitializedAsync()
     {
-        _data = await Controller.FetchData();
-        _data = await Controller.SortByDate(_data, false);
-        _filteredData = _data;
-        ConfigurePieConfig();
-    }
-
-    private void ConfigurePieConfig()
-    {
-        _barConfig = new BarConfig
-        {
-            Options = new BarOptions
-            {
-                Responsive = true,
-                Title = new OptionsTitle
-                {
-                    Display = true,
-                    Text = "Average values of sensors"
-                },
-                Legend = new Legend
-                {
-                    Position = Position.Top
-                }
-            }
-        };
-
-        _barConfig.Data.Datasets.Clear();
-        _barConfig.Data.Labels.Clear();
-        foreach (var id in _filteredData.Select(x => x.SensorId).Distinct().OrderBy(x => x))
-        {
-            var data = _filteredData.Where(x => x.SensorId.Equals(id)).ToList();
-            List<decimal> typeData = new List<decimal>();
-            foreach (var type in data.Select(x => x.type).Distinct())
-            {
-                typeData.Add(data.Where(x => x.type.Equals(type)).Select(x => x.Value).Average());
-            }
-            IDataset<decimal> dataset = new BarDataset<decimal>(typeData)
-                {
-                    Label = id.ToString(),
-
-                    BackgroundColor = ColorUtil.RandomColorString()
-                };
-            _barConfig.Data.Datasets.Add(dataset);
-
-        }
-        foreach (var type in _filteredData.Select(x => x.type).Distinct())
-        {
-            _barConfig.Data.Labels.Add(type);
-
-        }
-    }
-
-    private void UpdatePieConfig()
-    {
-        _barConfig.Data.Datasets.Clear();
-        _barConfig.Data.Labels.Clear();
-        foreach (var id in _filteredData.Select(x => x.SensorId).Distinct().OrderBy(x => x))
-        {
-            var data = _filteredData.Where(x => x.SensorId.Equals(id)).ToList();
-            List<decimal> typeData = new List<decimal>();
-            foreach (var type in data.Select(x => x.type).Distinct())
-            {
-                typeData.Add(data.Where(x => x.type.Equals(type)).Select(x => x.Value).Average());
-            }
-            IDataset<decimal> dataset = new BarDataset<decimal>(typeData)
-                {
-                    Label = id.ToString(),
-
-                    BackgroundColor = ColorUtil.RandomColorString()
-                };
-            _barConfig.Data.Datasets.Add(dataset);
-
-        }
-        foreach (var type in _filteredData.Select(x => x.type).Distinct())
-        {
-            _barConfig.Data.Labels.Add(type);
-
-        }
-        _chart.Update();
-    }
-
-    private async Task SendFilters()
-    {
-        _filteredData = await Controller.ApplyFilters(SelectedType, SelectedId, SelectedAfter, SelectedBefore);
-        UpdatePieConfig();
-    }
-
-    private string CurrentDataToCsvFormat()
-    {
-        var csv = new StringBuilder();
-        String header = "sensor type;sensor id;read date;value;direction";
-        csv.AppendLine(header);
-        
-        foreach (var record in _filteredData)
-        {
-            var direction = record.Direction == -1 ? "N.D" : record.Direction.ToString(CultureInfo.CurrentCulture);
-            var line = $"{record.type};{record.SensorId};{record.Time};{record.Value};{direction}";
-            csv.AppendLine(line);
-        }
-        return csv.ToString();
-    }
-
-    private string CurrentDataToJsonFormat()
-    {
-        var dto = new CurrentDataDto(_filteredData);
-        var str = JsonSerializer.Serialize(dto);
-        return str;
-    }
-
-    private Stream GetCsvStream()
-    {
-        var tmp = Encoding.UTF8.GetBytes(CurrentDataToCsvFormat());
-        return new MemoryStream(tmp);
-    }
-
-    private Stream GetJsonStream()
-    {
-        var tmp = Encoding.UTF8.GetBytes(CurrentDataToJsonFormat());
-        return new MemoryStream(tmp);
-    }
-
-    private async Task DownloadCsv()
-    {
-        var stream = GetCsvStream();
-        var fileName = "data.csv";
-
-        using var streamRef = new DotNetStreamReference(stream: stream);
-        await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-    }
-
-    private async Task DownloadJson()
-    {
-        var stream = GetJsonStream();
-        var fileName = "data.json";
-
-        using var streamRef = new DotNetStreamReference(stream: stream);
-        await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-    }
-
-    private async Task SortByType()
-    {
-        _sortByTypeAscending = !_sortByTypeAscending;
-        _filteredData = await Controller.SortBySensorType(_filteredData, _sortByTypeAscending);
-        StateHasChanged();
-    }
-
-    private async Task SortById()
-    {
-        _sortByIdAscending = !_sortByIdAscending;
-        _filteredData = await Controller.SortBySensorId(_filteredData, _sortByIdAscending);
-        StateHasChanged();
-    }
-
-    private async Task SortByDate()
-    {
-        _sortByDateAscending = !_sortByDateAscending;
-        _filteredData = await Controller.SortByDate(_filteredData, _sortByDateAscending);
-        StateHasChanged();
-    }
-
-    private async Task SortByValue()
-    {
-        _sortByValueAscending = !_sortByValueAscending;
-        _filteredData = await Controller.SortByValue(_filteredData, _sortByValueAscending);
-        StateHasChanged();
+        await DataModel.Init();
+        _data = DataModel.AllSensorsRecords;
     }
 }

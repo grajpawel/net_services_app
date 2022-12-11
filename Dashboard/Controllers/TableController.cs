@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dashboard.Data;
 using Dashboard.Dtos;
 
-namespace Dashboard.Data;
+namespace Dashboard.Controllers;
 
 public class TableController
 {
@@ -19,14 +20,12 @@ public class TableController
 
     public async Task<List<ISensorDto>> FetchData()
     {
-        if (_list == null)
-        {
-            _list = new List<ISensorDto>();
-            _list.AddRange(await _service.GetHumidityData());
-            _list.AddRange(await _service.GetTemperatureData());
-            _list.AddRange(await _service.GetPressureData());
-            _list.AddRange(await _service.GetWindData());
-        }
+        if (_list != null) return _list;
+        _list = new List<ISensorDto>();
+        _list.AddRange(await _service.GetHumidityData());
+        _list.AddRange(await _service.GetTemperatureData());
+        _list.AddRange(await _service.GetPressureData());
+        _list.AddRange(await _service.GetWindData());
         return _list;
     }
 
@@ -150,5 +149,4 @@ public class TableController
     {
         return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
     }
-
 }

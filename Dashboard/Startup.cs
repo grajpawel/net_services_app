@@ -1,10 +1,13 @@
 using System.Net.Http;
+using Dashboard.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Dashboard.Data;
+using Dashboard.Models;
+using Microsoft.JSInterop;
 
 namespace Dashboard
 {
@@ -30,6 +33,9 @@ namespace Dashboard
             services.AddSingleton<HttpClient>();
             services.AddSingleton<SensorsService>();
             services.AddScoped<TableController>();
+            services.AddScoped<SensorsDataModel>();
+            services.AddSingleton<ChartController>();
+            services.AddScoped<DownloadController>();
             services.AddSingleton(appOptions);
         }
 
