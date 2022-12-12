@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Dtos;
 using API.MongoDb;
+using API.Parameters;
 using AutoMapper;
 using MessageGenerator.MessageBodies;
 using Microsoft.AspNetCore.Mvc;
@@ -23,16 +24,25 @@ namespace API.Controllers
 
         // GET: api/humidity
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HumidityDto>>> GetAllSensorData()
+        public async Task<ActionResult<IEnumerable<HumidityDto>>> GetAllSensorData([FromQuery] QueryParameters parameters)
         {
-            return await _service.GetAsync();
+            if (!parameters.ValidDateRange || !parameters.ValidValueRange)
+            {
+                return BadRequest("Invalid filtering parameters");
+            }
+            return await _service.GetAsync(parameters);
         }
 
         // GET: api/humidity/5
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<IEnumerable<Humidity>>> GetSensorData(int id)
+        public async Task<ActionResult<IEnumerable<Humidity>>> GetSensorData(int id, [FromQuery] QueryParameters parameters)
         {
-            var humidityDtos = await _service.GetSensorDataAsync(id);
+            if (!parameters.ValidDateRange || !parameters.ValidValueRange)
+            {
+                return BadRequest("Invalid filtering parameters");
+            }
+            
+            var humidityDtos = await _service.GetSensorDataAsync(id, parameters);
             var humidity = _mapper.Map<List<Humidity>>(humidityDtos);
 
             return humidityDtos == null ? NotFound() : humidity;
