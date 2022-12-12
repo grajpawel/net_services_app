@@ -4,7 +4,7 @@ using System.Linq.Dynamic.Core;
 using System.Reflection;
 using System.Text;
 
-namespace API.Parameters;
+namespace API.Helpers;
 
 public class SortHelper<T> : ISortHelper<T>
 {
@@ -24,7 +24,7 @@ public class SortHelper<T> : ISortHelper<T>
         var propertyInfos = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
         var orderByQueryBuilder = new StringBuilder();
 
-        foreach (var param in orderParams.Reverse())
+        foreach (var param in orderParams)
         {
             if (string.IsNullOrEmpty(param))
             {

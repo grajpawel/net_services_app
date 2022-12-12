@@ -2,7 +2,7 @@
 using API.Consumers;
 using API.Dtos;
 using API.MongoDb;
-using API.Parameters;
+using API.Helpers;
 using AutoMapper;
 using MassTransit;
 using MessageGenerator.MessageBodies;

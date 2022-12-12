@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace API.Parameters;
+namespace API.Helpers;
 
 public interface ISortHelper<T>
 {
