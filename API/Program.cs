@@ -2,6 +2,7 @@
 using API.Consumers;
 using API.Dtos;
 using API.MongoDb;
+using API.Helpers;
 using AutoMapper;
 using MassTransit;
 using MessageGenerator.MessageBodies;
@@ -55,10 +56,20 @@ namespace API
                     services.AddSingleton(mongoDbTemperatureSettings);
                     services.AddSingleton(mongoDbWindSettings);
 
-                    var humidityService =  new HumidityService(mongoDbHumiditySettings, mapper);
-                    var pressureService =  new PressureService(mongoDbPressureSettings, mapper);
-                    var temperatureService =  new TemperatureService(mongoDbTemperatureSettings, mapper);
-                    var windService =  new WindService(mongoDbWindSettings, mapper);
+                    ISortHelper<HumidityDto> humiditySortHelper = new SortHelper<HumidityDto>(); 
+                    ISortHelper<PressureDto> pressureSortHelper = new SortHelper<PressureDto>(); 
+                    ISortHelper<TemperatureDto> temperatureSortHelper = new SortHelper<TemperatureDto>(); 
+                    ISortHelper<WindDto> windSortHelper = new SortHelper<WindDto>();
+
+                    services.AddSingleton(humiditySortHelper);
+                    services.AddSingleton(pressureSortHelper);
+                    services.AddSingleton(temperatureSortHelper);
+                    services.AddSingleton(windSortHelper);
+
+                    var humidityService =  new HumidityService(mongoDbHumiditySettings, mapper, humiditySortHelper);
+                    var pressureService =  new PressureService(mongoDbPressureSettings, mapper, pressureSortHelper);
+                    var temperatureService =  new TemperatureService(mongoDbTemperatureSettings, mapper, temperatureSortHelper);
+                    var windService =  new WindService(mongoDbWindSettings, mapper, windSortHelper);
 
                     services.AddMassTransit(x =>
                     {

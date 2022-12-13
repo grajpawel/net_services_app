@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Dtos;
+using API.Helpers;
+using API.Parameters;
 using AutoMapper;
 using MessageGenerator.MessageBodies;
 using MongoDB.Driver;
@@ -13,13 +16,15 @@ namespace API.MongoDb
     {
         private readonly IMongoCollection<HumidityDto> _collection;
         private readonly IMapper _mapper;
+        private readonly ISortHelper<HumidityDto> _sortHelper;
 
-        public HumidityService(MongoDbHumiditySettings mongoDbSettings, IMapper mapper)
+        public HumidityService(MongoDbHumiditySettings mongoDbSettings, IMapper mapper, ISortHelper<HumidityDto> sortHelper)
         {
             _mapper = mapper;
             var client = new MongoClient(mongoDbSettings.ConnectionUri);
             var database = client.GetDatabase(mongoDbSettings.DatabaseName);
             _collection = database.GetCollection<HumidityDto>(mongoDbSettings.CollectionName);
+            _sortHelper = sortHelper;
         }
 
         public async Task<List<HumidityDto>> GetAsync()
@@ -56,6 +61,24 @@ namespace API.MongoDb
         public Task DeleteAsync(string id)
         {
             throw new NotImplementedException();
+        }
+        
+        public async Task<List<HumidityDto>> GetAsync(QueryParameters parameters)
+        {
+            var all = await GetAsync();
+            all = all.FindAll(x =>
+                x.Time >= parameters.ReadAfter && x.Time <= parameters.ReadBefore && x.Value >= parameters.MinValue &&
+                x.Value <= parameters.MaxValue);
+            return _sortHelper.ApplySort(all.AsQueryable(), parameters.OrderBy).ToList();
+        }
+
+        public async Task<List<HumidityDto>> GetSensorDataAsync(int sensorId, QueryParameters parameters)
+        {
+            var all = await GetSensorDataAsync(sensorId);
+            all = all.FindAll(x =>
+                x.Time >= parameters.ReadAfter && x.Time <= parameters.ReadBefore && x.Value >= parameters.MinValue &&
+                x.Value <= parameters.MaxValue);
+            return _sortHelper.ApplySort(all.AsQueryable(), parameters.OrderBy).ToList();
         }
     }
 }
