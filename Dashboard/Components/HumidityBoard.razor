@@ -3,6 +3,7 @@
 @using Dashboard.Dtos
 @inject HttpClient HttpClient;
 @inject AppOptions AppOptions;
+@implements IDisposable
 
 <h4>Humidity sensor number @SensorId</h4>
 
@@ -64,4 +65,10 @@
 
         await base.OnInitializedAsync();
     }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
 }

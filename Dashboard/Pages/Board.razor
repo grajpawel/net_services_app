@@ -1,6 +1,60 @@
-﻿@page "/Board"
+﻿@page "/board"
+@using Dashboard.Data
+@using Dashboard.Components
+@inject SensorsService SensorsService;
+
 <h3>Board</h3>
 
-@code {
+@if (_humidity == null)
+{
+    <em>Waiting...</em>
+}
+else
+{
+    @foreach (var h in _humidity)
+    {
+        <HumidityBoard SensorId="@h"/>
+        <br/>
+    }
+    <br/>
     
+    @foreach (var p in _pressure)
+    {
+        <PressureBoard SensorId="@p" />
+        <br/>
+    }
+    <br/>
+    
+    @foreach (var t in _temperature)
+    {
+        <TemperatureBoard SensorId="@t" />
+        <br/>
+    }
+    
+    @foreach (var w in _wind)
+    {
+        <WindBoard SensorId="@w" />
+        <br/>
+    }
+    
+}
+
+@code {
+    private IList<int> _humidity;
+    private IList<int> _pressure;
+    private IList<int> _temperature;
+    private IList<int> _wind;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var humidityTmp = await SensorsService.GetHumidityData();
+        var pressureTmp = await SensorsService.GetPressureData();
+        var temperatureTmp = await SensorsService.GetTemperatureData();
+        var windTmp = await SensorsService.GetWindData();
+        
+        _humidity = humidityTmp.Select(x => x.SensorId).Distinct().OrderBy(x => x).ToList();
+        _pressure = pressureTmp.Select(x => x.SensorId).Distinct().OrderBy(x => x).ToList();
+        _temperature = temperatureTmp.Select(x => x.SensorId).Distinct().OrderBy(x => x).ToList();
+        _wind = windTmp.Select(x => x.SensorId).Distinct().OrderBy(x => x).ToList();
+    }
 }

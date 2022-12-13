@@ -7,7 +7,7 @@ namespace Dashboard.Data;
 
 public class SensorsService
 {
-    private HttpClient _client;
+    private readonly HttpClient _client;
     private readonly AppOptions _appOptions;
 
     public SensorsService(HttpClient client, AppOptions appOptions)

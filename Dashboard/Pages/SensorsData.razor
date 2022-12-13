@@ -64,7 +64,9 @@ else
                             .DistinctBy(x => x.ToLongTimeString())
                             .OrderBy(x => x))
                         {
-                            <option value="@date">@date</option>
+                            <option value="@date">
+                                @TimeZoneInfo.ConvertTime(date, TimeZoneInfo.Utc, TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))
+                            </option>
                         }
                     </select>
                 </form>
@@ -79,7 +81,9 @@ else
                             .DistinctBy(x => x.ToLongTimeString())
                             .OrderBy(x => x))
                         {
-                            <option value="@date">@date</option>
+                            <option value="@date">
+                                @TimeZoneInfo.ConvertTime(date, TimeZoneInfo.Utc, TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))
+                            </option>
                         }
                     </select>
                 </form>
@@ -96,7 +100,9 @@ else
             <tr>
                 <td>@h.Type</td>
                 <td>@h.SensorId</td>
-                <td>@h.Time</td>
+                <td>
+                    @TimeZoneInfo.ConvertTime(h.Time, TimeZoneInfo.Utc, TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))
+                </td>
                 <td>@h.Value</td>
                 @if (h.Direction != -1)
                 {

@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Dashboard.Data;
 using Dashboard.Models;
-using Microsoft.JSInterop;
 
 namespace Dashboard
 {
@@ -29,7 +28,6 @@ namespace Dashboard
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddControllersWithViews();
-            services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<HttpClient>();
             services.AddSingleton<SensorsService>();
             services.AddScoped<TableController>();
