@@ -1,0 +1,67 @@
+﻿@using System.Net.Http.Json
+@using System.Threading
+@using Dashboard.Dtos
+@inject HttpClient HttpClient;
+@inject AppOptions AppOptions;
+
+<h4>Humidity sensor number @SensorId</h4>
+
+<h6>Last value: @_lastValue</h6>
+
+<h6>Average value: @_averageValue</h6>
+
+@code {
+    [Parameter]
+    public int SensorId { get; set; }
+
+    private IList<HumidityDto> _data;
+
+    private decimal _averageValue;
+
+    private decimal _lastValue;
+
+    private Timer _timer;
+
+    private async Task<IList<HumidityDto>> DownloadData()
+    {
+        using var response = await HttpClient.GetAsync($"{AppOptions.HumidityApiLink}/{SensorId}");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<HumidityDto>>();
+    }
+
+    private async Task OnClock()
+    {
+        var downloaded = await DownloadData();
+
+        var isEqual = _data.OrderBy(x => x.Time).SequenceEqual(downloaded.OrderBy(x => x.Time));
+
+        if (!isEqual)
+        {
+            _data = downloaded.OrderBy(x => x.Time).ToList();
+            while (_data.Count > 100)
+            {
+                _data.RemoveAt(0);
+            }
+
+            _lastValue = _data.Last().Value;
+            _averageValue = _data.Average(x => x.Value);
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _data = await DownloadData();
+        await OnClock(); 
+        async void Callback(object stateInfo)
+        {
+            await OnClock();
+        }
+
+        _timer = new Timer(Callback, new AutoResetEvent(false), 1000, 1000);
+
+        await base.OnInitializedAsync();
+    }
+}
