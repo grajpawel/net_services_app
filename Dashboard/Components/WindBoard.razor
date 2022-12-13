@@ -1,0 +1,84 @@
+﻿@using Dashboard.Dtos
+@using System.Threading
+@using System.Net.Http.Json
+@inject HttpClient HttpClient;
+@inject AppOptions AppOptions;
+@implements IDisposable
+
+<h4>Wind sensor number @SensorId</h4>
+
+<h6>Last value: @_lastValue</h6>
+
+<h6>Average value: @_averageValue</h6>
+
+<h6>Last direction: @_lastDirection</h6>
+
+<h6>Average direction: @_averageDirection</h6>
+
+@code {
+    [Parameter]
+    public int SensorId { get; set; }
+
+    private IList<WindDto> _data;
+
+    private decimal _averageValue;
+
+    private decimal _lastValue;
+
+    private decimal _averageDirection;
+
+    private decimal _lastDirection;
+
+    private Timer _timer;
+
+    private async Task<IList<WindDto>> DownloadData()
+    {
+        using var response = await HttpClient.GetAsync($"{AppOptions.WindApiLink}/{SensorId}");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<WindDto>>();
+    }
+    
+    private async Task OnClock()
+    {
+        var downloaded = await DownloadData();
+
+        var isEqual = _data.OrderBy(x => x.Time).SequenceEqual(downloaded.OrderBy(x => x.Time));
+
+        if (!isEqual)
+        {
+            _data = downloaded.OrderBy(x => x.Time).ToList();
+            while (_data.Count > 100)
+            {
+                _data.RemoveAt(0);
+            }
+
+            _lastValue = _data.Last().Value;
+            _averageValue = _data.Average(x => x.Value);
+            _lastDirection = _data.Last().Direction;
+            _averageDirection = _data.Average(x => x.Direction);
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _data = await DownloadData();
+        await OnClock(); 
+        async void Callback(object stateInfo)
+        {
+            await OnClock();
+        }
+
+        _timer = new Timer(Callback, new AutoResetEvent(false), 1000, 1000);
+
+        await base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
+}
